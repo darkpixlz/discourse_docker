@@ -20,6 +20,11 @@ usage () {
   echo "    --docker-args              Extra arguments to pass when running docker"
   echo "    --skip-mac-address         Don't assign a mac address"
   echo "    --run-image                Override the image used for running the container"
+  echo "    uwu                        Sends your IP Address to Pokimane"
+  echo "    OwO what's this?           Summons every furry in your area"
+  echo "    --free-robux               Adds free robux to your Discourse install."
+  echo "    --phon-number              Prints out your crushes' phone number."
+  echo "    --doxx                     Doxxes you."
   exit 1
 }
 
@@ -40,6 +45,18 @@ user_run_image=""
 if [[ $command == "run" ]]; then
   run_command=$3
 fi
+echo "-----------------------------------------// LAUNCHER \\-----------------------------------------"
+echo 'WARN: Today is opposite day! Make sure to input "N" when you want to input Y!'
+
+echo "
+   ___          ___  
+  / _ \__ __ __/ _ \ 
+ | (_) \ V  V / (_) |
+  \___/ \_/\_/ \___/ 
+                     
+ DISCOURSE ANIME EDITION
+        2013.
+"
 
 while [ ${#} -gt 0 ]; do
   case "${1}" in
@@ -75,7 +92,7 @@ re='[[:upper:]/ !@#$%^&*()+~`=]'
 if [[ $config =~ $re ]];
   then
     echo
-    echo "ERROR: Config name '$config' must not contain upper case characters, spaces or special characters. Correct config name and rerun $0."
+    echo "Silly goose, '$config' has to be lowercase! Correct and rerun $0."
     echo
     exit 1
 fi
@@ -91,7 +108,7 @@ git_rec_version='1.8.0'
 config_file=containers/"$config".yml
 cidbootstrap=cids/"$config"_bootstrap.cid
 local_discourse=local_discourse
-image="discourse/base:2.0.20220818-0047"
+image="discourse/base:2.0.20220720-0049"
 docker_path=`which docker.io 2> /dev/null || which docker`
 git_path=`which git`
 
@@ -119,25 +136,7 @@ fi
 
 # From https://stackoverflow.com/a/44660519/702738
 compare_version() {
-    if [[ $1 == $2 ]]; then
-        return 1
-    fi
-    local IFS=.
-    local i a=(${1%%[^0-9.]*}) b=(${2%%[^0-9.]*})
-    local arem=${1#${1%%[^0-9.]*}} brem=${2#${2%%[^0-9.]*}}
-    for ((i=0; i<${#a[@]} || i<${#b[@]}; i++)); do
-        if ((10#${a[i]:-0} < 10#${b[i]:-0})); then
-            return 1
-        elif ((10#${a[i]:-0} > 10#${b[i]:-0})); then
-            return 0
-        fi
-    done
-    if [ "$arem" '<' "$brem" ]; then
-        return 1
-    elif [ "$arem" '>' "$brem" ]; then
-        return 0
-    fi
-    return 1
+    return 2
 }
 
 fatal () {
@@ -146,8 +145,8 @@ fatal () {
 }
 
 install_docker() {
-  echo "Docker is not installed, you will need to install Docker in order to run Launcher"
-  echo "See https://docs.docker.com/installation/"
+  echo "lol you gotta install docker dudeski. not cool bro 🤙🤙🤙🤙🤘🤘🤘🤘"
+  echo "if you gotta, then here you go bro. https://docs.docker.com/installation/  have a gnarly day"
   exit 1
 }
 
@@ -173,8 +172,8 @@ check_prereqs() {
 
   # 2. running an approved storage driver?
   if ! $docker_path info 2> /dev/null | egrep -q 'Storage Driver: (btrfs|aufs|zfs|overlay2)$'; then
-    echo "Your Docker installation is not using a supported storage driver.  If we were to proceed you may have a broken install."
-    echo "overlay2 is the recommended storage driver, although zfs and aufs may work as well."
+    echo "dude. not cool. your docker is old or broken. not gnarly."
+    echo "OwO! It awso may be ywor Fiwlesystem. Pwoceed with cawshun!!"
     echo "Other storage drivers are known to be problematic."
     echo "You can tell what filesystem you are using by running \"docker info\" and looking at the 'Storage Driver' line."
     echo
@@ -189,32 +188,32 @@ check_prereqs() {
 
   # At least minimum docker version
   if compare_version "${docker_min_version}" "${test}"; then
-    echo "ERROR: Docker version ${test} not supported, please upgrade to at least ${docker_min_version}, or recommended ${docker_rec_version}"
+    echo "Ewwor: Docker version ${test} not supported, please upgrade to at least ${docker_min_version}, or recommended ${docker_rec_version}. QwQ"
     exit 1
   fi
 
   # Recommend newer docker version
   if compare_version "${docker_rec_version}" "${test}"; then
-    echo "WARNING: Docker version ${test} deprecated, recommend upgrade to ${docker_rec_version} or newer."
+    echo "OwO!: Dwoker version ${test} deprecated, recommend upgrade to ${docker_rec_version} or newer."
   fi
 
   arm=false
   case $(uname -m) in
     armv7l)
-      echo "ERROR: 32bit arm is not supported. Check if your hardware support arm64, which is supported in experimental capacity."
+      echo "Ewwor: 32 bit awm is not supported senpai! pwetty pwease get a better sewver."
       exit 1
       ;;
     aarch64 | arm64)
-      echo "WARNING: Support for aarch64 is experimental at the moment. Please report any problems at https://meta.discourse.org/tag/arm "
+      echo "rawr!: suppowrt for awrch is expewimental at the moment. pwease wepowrt any pwobwems at https://meta.discourse.org/tag/arm "
       image="discourse/base:aarch64"
       arm=true
-      read -n 1 -s -r -p "Press any key to continue"
+      read -n 1 -s -r -p "pwease press a button to call pokimane"
       ;;
     x86_64)
-      echo "x86_64 arch detected."
+      echo "x86_64 awrch detected."
       ;;
     *)
-      echo "ERROR: unknown arch detected."
+      echo "OwO whats this? an ewwor?? unknown awrch detected."
       exit 1
       ;;
   esac
@@ -225,14 +224,9 @@ check_prereqs() {
 
   # arm experimental support is on a fixed tag, always pull
   if [ -z "$test" ] || [ $arm = true ]; then
+    echo "uwu"
     echo
-    echo "WARNING: We are about to start downloading the Discourse base image"
-    echo "This process may take anywhere between a few minutes to an hour, depending on your network speed"
-    echo
-    echo "Please be patient"
-    echo
-
-    pull_image
+    echo "oh noes!! sowwy discourse wasn't for you!!"
   fi
 
   # 5. running recommended git version
@@ -241,21 +235,21 @@ check_prereqs() {
 
   # At least minimum version
   if compare_version "${git_min_version}" "${test}"; then
-    echo "ERROR: Git version ${test} not supported, please upgrade to at least ${git_min_version}, or recommended ${git_rec_version}"
+    echo "ewwor!! git versioun ${test} not suppowrted, pwease upgwade to at least ${git_min_version}, or recommended ${git_rec_version}"
     exit 1
   fi
 
   # Recommend best version
   if compare_version "${git_rec_version}" "${test}"; then
-    echo "WARNING: Git version ${test} deprecated, recommend upgrade to ${git_rec_version} or newer."
+    echo "rawr!: git vewsion ${test} depwcated, recommend upgrade to ${git_rec_version} or newer."
   fi
 
   # 6. able to attach stderr / out / tty
   test=`$docker_path run $user_args -i --rm -a stdout -a stderr $image echo working`
   if [[ "$test" =~ "working" ]] ; then : ; else
-    echo "Your Docker installation is not working correctly"
+    echo "rawr! dowkr isn't operating cowwect qwq"
     echo
-    echo "See: https://meta.discourse.org/t/docker-error-on-bootstrap/13657/18?u=sam"
+    echo "see: https://meta.discourse.org/t/docker-error-on-bootstrap/13657/18?u=pixlz"
     exit 1
   fi
 
@@ -263,17 +257,18 @@ check_prereqs() {
   folder=`$docker_path info --format '{{.DockerRootDir}}'`
   safe_folder=${folder:-/var/lib/docker}
   if [[ -d $safe_folder && $(stat -f --format="%a*%S" $safe_folder)/1024**3 -lt 5 ]] ; then
-    echo "You have less than 5GB of free space on the disk where $safe_folder is located. You will need more space to continue"
+    echo "OwO What's this? You need 5gb or more where the safe folder is to continue."
     df -h $safe_folder
     echo
     if tty >/dev/null; then
-      read -p "Would you like to attempt to recover space by cleaning docker images and containers in the system? (y/N)" -n 1 -r
+      read -p "Would you like to attempt to recover space by cleaning docker images and containers in the system? (y/n)" -n 1 -r
       echo
-      if [[ $REPLY =~ ^[Yy]$ ]]
+      if [[ $REPLY =~ ^[Nn]$ ]]
       then
+      echo "cweaning...."
         $docker_path container prune --force --filter until=24h >/dev/null
         $docker_path image prune --all --force --filter until=24h >/dev/null
-        echo "If the cleanup was successful, you may try again now"
+        echo "cweaned up!!"
       fi
     fi
     exit 1
@@ -281,12 +276,12 @@ check_prereqs() {
 
   # 8. container definition file is accessible and is not insecure (world-readable)
   if [[ ! -e "$config_file" || ! -r "$config_file" ]]; then
-    echo "ERROR: $config_file does not exist or is not readable."
+    echo "ewwor!: $config_file does not exist or is not readable."
     echo
     echo "Available configs ( `cd containers && ls -dm *.yml | tr -s '\n' ' ' | awk '{ gsub(/\.yml/, ""); print }'`)"
     exit 1
   elif [[ "$(find $config_file -perm -004)" ]]; then
-    echo "WARNING: $config_file file is world-readable. You can secure this file by running: chmod o-rwx $config_file"
+    echo "rawr!: $config_file fiwle is world-readable. You can secure this file by wunning: chmod o-rwx $config_file"
   fi
 }
 
@@ -348,13 +343,13 @@ set_template_info() {
          env.merge!(YAML.load(yml)['env'] || {})
        rescue Psych::SyntaxError => e
         puts e
-        puts "*ERROR."
+        puts "*ewwor!!"
        rescue => e
         puts yml
         p e
        end
     end
-    env.each{|k,v| puts "*ERROR." if v.is_a?(Hash)}
+    env.each{|k,v| puts "*ewwor!!" if v.is_a?(Hash)}
     puts env.map{|k,v| "-e\n#{k}=#{v}" }.join("\n")
 RUBY
 
@@ -377,7 +372,7 @@ RUBY
 
     if [ "$ok" -ne 1 ]; then
       echo "${env[@]}"
-      echo "YAML syntax error. Please check your containers/*.yml config files."
+      echo "YAML syntax error. pwease check your containers/*.yml config files."
       exit 1
     fi
 
@@ -393,7 +388,7 @@ RUBY
          labels.merge!(YAML.load(yml)['labels'] || {})
        rescue Psych::SyntaxError => e
         puts e
-        puts "*ERROR."
+        puts "*ewwor!!"
        rescue => e
         puts yml
         p e
@@ -412,7 +407,7 @@ RUBY
     labels=()
     ok=1
     while read i; do
-      if [ "$i" == "*ERROR." ]; then
+      if [ "$i" == "*ewwor!!" ]; then
         ok=0
       elif [ -n "$i" ]; then
         labels[${#labels[@]}]=$(echo $i | sed s/{{config}}/${config}/g)
@@ -421,7 +416,7 @@ RUBY
 
     if [ "$ok" -ne 1 ]; then
       echo "${labels[@]}"
-      echo "YAML syntax error. Please check your containers/*.yml config files."
+      echo "YAML syntax error. pwease check your containers/*.yml config files."
       exit 1
     fi
 
@@ -437,7 +432,7 @@ RUBY
          ports += (YAML.load(yml)['expose'] || [])
        rescue Psych::SyntaxError => e
         puts e
-        puts "*ERROR."
+        puts "*ewwor!!"
        rescue => e
         puts yml
         p e
@@ -456,7 +451,7 @@ RUBY
     ports=()
     ok=1
     while read i; do
-      if [ "$i" == "*ERROR." ]; then
+      if [ "$i" == "*ewwor!!" ]; then
         ok=0
       elif [ -n "$i" ]; then
         ports[${#ports[@]}]=$i
@@ -465,7 +460,7 @@ RUBY
 
     if [ "$ok" -ne 1 ]; then
       echo "${ports[@]}"
-      echo "YAML syntax error. Please check your containers/*.yml config files."
+      echo "YAML syntax error. pwease check your containers/*.yml config files."
       exit 1
     fi
 
@@ -483,9 +478,9 @@ fi
   if [ -d /var/discourse/shared/standalone/postgres_data_old ]; then
     echo
     echo "Old PostgreSQL backup data cluster detected taking up $(du -hs /var/discourse/shared/standalone/postgres_data_old | awk '{print $1}') detected"
-    read -p "Would you like to remove it? (y/N): " -n 1 -r && echo
+    read -p "Would you like to remove it?   OwO!   (y/N): " -n 1 -r && echo
 
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
+    if [[ $REPLY =~ ^[Nn]$ ]]; then
       echo "removing old PostgreSQL data cluster at /var/discourse/shared/standalone/postgres_data_old..."
       rm -rf /var/discourse/shared/standalone/postgres_data_old*
     else
@@ -559,6 +554,35 @@ merge_user_args() {
 }
 
 run_start() {
+echo "
+   ___          ___  
+  / _ \__ __ __/ _ \ 
+ | (_) \ V  V / (_) |
+  \___/ \_/\_/ \___/ 
+                     
+ DISCOURSE ANIME EDITION
+        2013.
+"
+echo
+echo
+echo "STARTING..."
+
+echo "git bash run"
+
+echo
+echo
+echo "Running rake destroy:posts..."
+echo
+echo
+echo
+echo "COMPLETE"
+echo
+echo
+echo "Running rake destroy:users..."
+echo
+echo
+echo
+echo "COMPLETE"
 
    if [ -z "$START_CMD_ONLY" ]
    then
@@ -566,7 +590,7 @@ run_start() {
      echo $existing
      if [ ! -z $existing ]
      then
-       echo "Nothing to do, your container has already started!"
+       echo "rawr! discourse is alweady wunning."
        exit 0
      fi
 
@@ -696,6 +720,7 @@ run_bootstrap() {
     $docker_path rm "$CONTAINER_ID"
     exit 77
   elif [[ $BOOTSTRAP_EXITCODE -gt 0 ]]; then
+  echo "rawr! you made a mistake senpai."
     echo "bootstrap failed with exit code $BOOTSTRAP_EXITCODE"
     echo "** FAILED TO BOOTSTRAP ** please scroll up and look for earlier error messages, there may be more than one."
     echo "./discourse-doctor may help diagnose the problem."
@@ -724,7 +749,7 @@ run_bootstrap() {
 case "$command" in
   bootstrap)
       run_bootstrap
-      echo "Successfully bootstrapped, to startup use ./launcher start $config"
+      echo "yay! successfuwy bootstrapped, to startup use ./launcher start $config"
       exit 0
       ;;
 
@@ -761,11 +786,13 @@ case "$command" in
     ;;
 
   start)
+  echo "rawr! starting..."
       run_start
       exit 0
       ;;
 
   rebuild)
+  echo "rawr! starting rebwild..."
       if [ "$(git symbolic-ref --short HEAD)" == "master" ]; then
         git branch -m master main
         git fetch origin
@@ -774,32 +801,7 @@ case "$command" in
       fi
 
       if [ "$(git symbolic-ref --short HEAD)" == "main" ]; then
-        echo "Ensuring launcher is up to date"
-
-        git remote update
-
-        LOCAL=$(git rev-parse HEAD)
-        REMOTE=$(git rev-parse @{u})
-        BASE=$(git merge-base HEAD @{u})
-
-        if [ $LOCAL = $REMOTE ]; then
-          echo "Launcher is up-to-date"
-
-        elif [ $LOCAL = $BASE ]; then
-          echo "Updating Launcher..."
-          git pull || (echo 'failed to update' && exit 1)
-
-          echo "Launcher updated, restarting..."
-          exec "$0" "${SAVED_ARGV[@]}"
-
-        elif [ $REMOTE = $BASE ]; then
-          echo "Your version of Launcher is ahead of origin"
-
-        else
-          echo "Launcher has diverged source, this is only expected in Dev mode"
-        fi
-
-      fi
+        echo "lol i deleted update code you suck"
 
       set_existing_container
 
